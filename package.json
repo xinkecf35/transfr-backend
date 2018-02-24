@@ -1,0 +1,24 @@
+{
+  "name": "transfr-backend",
+  "version": "1.0.0",
+  "description": "API for transfr.info",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkecf35/transfr-backend.git"
+  },
+  "author": "Xinke Chen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xinkecf35/transfr-backend/issues"
+  },
+  "homepage": "https://github.com/xinkecf35/transfr-backend#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "express-oauth-server": "^2.0.0",
+    "mongoose": "^5.0.0-rc2"
+  }
+}
