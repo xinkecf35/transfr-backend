@@ -8,8 +8,8 @@ let UserSchema = new Schema({
   created: {type: Date, default: Date.now},
   vcardProfiles: [{
     type: Schema.Types.ObjectId,
-    ref: 'vcardProfile',
+    ref: 'VCardProfile',
   }],
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', UserSchema, 'users');
