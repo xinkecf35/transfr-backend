@@ -14,16 +14,11 @@ const LOCAL_STRATEGY_CONFIG = {
 // Serializing user
 
 passport.serializeUser(function(user, cb) {
-  cb(null, user.id);
+  cb(null, user);
 });
 
-passport.deserializeUser(function(id, cb) {
-  db.users.findById(id, function(err, user) {
-    if (err) {
-      return cb(err);
-    }
-    cb(null, user);
-  });
+passport.deserializeUser(function(user, cb) {
+  cb(null, user);
 });
 
 // Defining Strategies
@@ -36,10 +31,16 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
       if (!user) {
         return done(null, false);
       }
-      if (user.comparePassword) {
-        return done(null, false);
-      }
-      return done(null, user);
+      user.comparePassword(password,function(err, user) {
+        if (err) {
+          return done(err);
+        }
+        if (user) {
+          return done(null, true);
+        } else {
+          return done(null, false);
+        }
+      });
     });
   }
 ));
