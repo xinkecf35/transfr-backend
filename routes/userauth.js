@@ -36,7 +36,7 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
       if (!user) {
         return done(null, false);
       }
-      if (user.password != password) {
+      if (user.comparePassword) {
         return done(null, false);
       }
       return done(null, user);
@@ -65,6 +65,18 @@ router.post('/users', function(req, res, next) {
     });
   })(req, res, next);
 });
-
+router.post('/users/new', function(req, res, next) {
+  // Need to validate this at some point
+  let user = new User();
+  user.username = req.body.username;
+  user.email = req.body.email;
+  user.password = req.body.password;
+  user.save(function(err, user) {
+    if (err) {
+      return err;
+    }
+    res.send(user);
+  });
+});
 
 module.exports = router;
