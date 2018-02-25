@@ -39,7 +39,6 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
       if (user.password != password) {
         return done(null, false);
       }
-      console.log('Success');
       return done(null, user);
     });
   }
@@ -47,10 +46,25 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
 
 
 // Routes
-router.post('/users',
-            passport.authenticate('local', {failureRedirect: '/error'}),
-            function(req, res) {
-              res.end();
+router.post('/users', function(req, res, next) {
+  passport.authenticate('local', function(err, user, info) {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      // Authentication failed
+      return res.status(401).send({
+                                  success: false,
+                                  message: 'authentication failed'});
+    }
+    req.login(user, function(err) {
+      if (err) {
+        return next(err);
+      }
+      return res.send({success: true, message: 'authentication succeeded'});
+    });
+  })(req, res, next);
 });
+
 
 module.exports = router;
