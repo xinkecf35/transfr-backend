@@ -1,7 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const passport = require('passport');
 const User = require('../models/user.js');
+
+const router = new express.Router();
 
 // Strategies
 const LocalStrategy = require('passport-local').Strategy;
@@ -31,7 +32,7 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
       if (!user) {
         return done(null, false);
       }
-      user.comparePassword(password,function(err, user) {
+      user.comparePassword(password, function(err, user) {
         if (err) {
           return done(err);
         }
