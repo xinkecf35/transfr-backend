@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user.js');
 
 const router = new express.Router();
@@ -23,29 +24,27 @@ passport.deserializeUser(function(user, cb) {
 });
 
 // Defining Strategies
-passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
-                                function(username, password, done) {
-    User.findOne({username: username}, function(err, user) {
+passport.use(new LocalStrategy(function(username, password, done) {
+  User.findOne({username: username}, function(err, user) {
+    if (err) {
+      return done(err);
+    }
+    if (!user) {
+      return done(null,
+                  false,
+                  {message: 'Incorrect username or username not found'});
+    }
+    user.comparePassword(password, function(err, response) {
       if (err) {
         return done(err);
       }
-      if (!user) {
-        return done(null, false);
+      if (response) {
+        return done(null, user);
       }
-      user.comparePassword(password, function(err, user) {
-        if (err) {
-          return done(err);
-        }
-        if (user) {
-          return done(null, true);
-        } else {
-          return done(null, false);
-        }
-      });
+      done(null, false, {message: 'Incorrect password or username'});
     });
-  }
-));
-
+  });
+}));
 
 // Routes
 router.post('/users', function(req, res, next) {
@@ -63,10 +62,11 @@ router.post('/users', function(req, res, next) {
       if (err) {
         return next(err);
       }
-      return res.send({success: true, message: 'authentication succeeded'});
+      return res.send(user);
     });
   })(req, res, next);
 });
+
 router.post('/users/new', function(req, res, next) {
   // Need to validate this at some point
   let user = new User();

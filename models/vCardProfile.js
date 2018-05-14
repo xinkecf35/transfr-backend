@@ -13,4 +13,4 @@ let VCardProfile = new Schema({
   impp: String,
 });
 
-module.exports = mongoose.model('VCardProfile', VCardProfile,'vcard_profiles');
+module.exports = mongoose.model('VCardProfile', VCardProfile, 'vcard_profiles');
