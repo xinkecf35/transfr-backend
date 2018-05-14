@@ -33,17 +33,16 @@ app.use(flash());
 
 // Misc app and Router configuration
 
-let port = process.env.PORT || 8800;
+const port = process.env.PORT || 8800;
+const router = new express.Router();
+const userauth = require('./routes/userauth.js');
 
-let router = express.Router();
-let userauth = require('./routes/userauth.js');
+app.use('/api/v1/', userauth);
+app.use('/api/v1', router);
 
 router.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
 });
-
-app.use('/api/v1/', userauth);
-app.use('/api/v1', router);
 
 app.listen(port);
 console.log('Listening on ' + port);
