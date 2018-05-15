@@ -54,7 +54,7 @@ router.post('/users', function(req, res, next) {
     }
     if (!user) {
       // Authentication failed
-      return res.status(401).send({
+      return res.status(400).send({
                                   success: false,
                                   message: 'authentication failed'});
     }
@@ -62,7 +62,17 @@ router.post('/users', function(req, res, next) {
       if (err) {
         return next(err);
       }
-      return res.send(user);
+      const profile = {
+        username: user.username,
+        email: user.email,
+        vcards: user.vcardProfiles,
+      };
+      const token = jwt.sign(user.toObject(), process.env.JWT_SECRET);
+      const responseObject = {
+        profile: profile,
+        token: token,
+      };
+      return res.json(responseObject);
     });
   })(req, res, next);
 });
