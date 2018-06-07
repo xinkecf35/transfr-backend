@@ -10,10 +10,6 @@ const mongoose = require('mongoose');
 const dbURI = process.env.DATABASE_URI;
 const db = mongoose.connection;
 
-// Object models
-const User = require('./models/user.js');
-const VCardProfile = require('./models/VCardProfile.js');
-
 // Passport setup
 const passport = require('passport');
 const flash = require('connect-flash');
@@ -34,13 +30,11 @@ app.use(flash());
 // Misc app and Router configuration
 
 const port = process.env.PORT || 8800;
-const router = new express.Router();
 const userauth = require('./routes/userauth.js');
 
-app.use('/api/v1/', userauth);
-app.use('/api/v1', router);
+app.use('/api/v1/users', userauth);
 
-router.get('/', function(req, res) {
+app.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
 });
 
