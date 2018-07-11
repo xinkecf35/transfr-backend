@@ -11,6 +11,7 @@
 
     "rules": {
         "semi": [ 2, "always"],
-        "node/exports-style": ["error", "module.exports"]
+        "node/exports-style": ["error", "module.exports"],
+        "indent": ["error", 2]
     }
 }

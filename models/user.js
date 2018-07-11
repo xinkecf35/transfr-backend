@@ -7,6 +7,7 @@ let UserSchema = new Schema({
               type: String,
               required: true},
   email: {type: String, required: true},
+  name: {type: String, required: true},
   password: {type: String, required: true},
   created: {type: Date, default: Date.now},
   vcardProfiles: [{
@@ -18,7 +19,6 @@ let UserSchema = new Schema({
 // hashes password with bcrypt
 UserSchema.pre('save', function(next) {
   let user = this;
-  console.log('pre fire');
   if (this.isModified('password') || this.isNew) {
     bcrypt.genSalt(10, function(err, salt) {
       if (err) {

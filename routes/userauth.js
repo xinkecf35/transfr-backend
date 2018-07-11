@@ -7,6 +7,10 @@ const PassportJWT = require('passport-jwt');
 
 const router = new express.Router();
 
+/*
+* Defining Passport Strategies
+*/
+
 // Strategies & options for Passport
 const LocalStrategy = PassportLocal.Strategy;
 const LOCAL_STRATEGY_CONFIG = {
@@ -29,30 +33,29 @@ passport.deserializeUser(function(user, cb) {
   cb(null, user);
 });
 
-// Defining Strategies
 // Local Strategy
 passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
-            function(username, password, done) {
-  User.findOne({username: username}, function(err, user) {
-    if (err) {
-      return done(err);
-    }
-    if (!user) {
-      return done(null,
-                  false,
-                  {message: 'Incorrect username or username not found'});
-    }
-    user.comparePassword(password, function(err, response) {
+  function(username, password, done) {
+    User.findOne({username: username}, function(err, user) {
       if (err) {
         return done(err);
       }
-      if (response) {
-        return done(null, user);
+      if (!user) {
+        return done(null,
+          false,
+          {message: 'Incorrect username or username not found'});
       }
-      done(null, false, {message: 'Incorrect password or username'});
+      user.comparePassword(password, function(err, response) {
+        if (err) {
+          return done(err);
+        }
+        if (response) {
+          return done(null, user);
+        }
+        done(null, false, {message: 'Incorrect password or username'});
+      });
     });
-  });
-}));
+  }));
 
 // JWT Strategy
 passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG, function(jwtPayload, done) {
@@ -69,7 +72,11 @@ passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG, function(jwtPayload, done) {
 }));
 
 
-// Routes and authentication
+/*
+    * Authentication and authorization of users
+    */
+
+// Password authentication
 router.post('/', function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err) {
@@ -77,9 +84,9 @@ router.post('/', function(req, res, next) {
     }
     if (!user) {
       // Authentication failed
-      return res.status(400).send({
-                                  success: false,
-                                  message: 'authentication failed'});
+      return res.status(401).send({
+        success: false,
+        message: 'authentication failed'});
     }
     req.login(user, function(err) {
       if (err) {
@@ -89,22 +96,34 @@ router.post('/', function(req, res, next) {
       const profile = {
         username: user.username,
         email: user.email,
-        vcards: user.vcardProfiles,
+        name: user.name,
       };
-      const token = jwt.sign(user.toObject(), process.env.JWT_SECRET, {
+      const token = jwt.sign(profile, process.env.JWT_SECRET, {
         expiresIn: 86400,
       });
-      return res.json({profile, token});
+      return res.status(201).json({profile, token});
     });
   })(req, res, next);
 });
 
+/*
+      * User data management
+      */
+
+// Update user
+router.put('/', function(req, res, next) {
+  passport.authenticate('jwt', function(err, user, info) {
+  });
+});
+
+// Creates a new user
 router.post('/new', function(req, res, next) {
   // Need to validate this at some point
   let user = new User();
   user.username = req.body.username;
   user.email = req.body.email;
   user.password = req.body.password;
+  user.name = req.body.name;
   user.save(function(err, user) {
     if (err) {
       return err;

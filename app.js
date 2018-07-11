@@ -16,7 +16,7 @@ const flash = require('connect-flash');
 
 
 // configure database and handling intial connection promise
-mongoose.connect(dbURI);
+mongoose.connect(dbURI, {useNewUrlParser: true});
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // configure app to use body-parser
@@ -31,8 +31,11 @@ app.use(flash());
 
 const port = process.env.PORT || 8800;
 const userauth = require('./routes/userauth.js');
+const vcardmanager = require('./routes/vcardmanager.js');
 
 app.use('/api/v1/users', userauth);
+app.use('/api/v1/user',
+  passport.authenticate('jwt', {session: false}, vcardmanager));
 
 app.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
