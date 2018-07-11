@@ -4,8 +4,8 @@ const bcrypt = require('bcrypt');
 
 let UserSchema = new Schema({
   username: {
-              type: String,
-              required: true},
+    type: String,
+    required: true},
   email: {type: String, required: true},
   name: {type: String, required: true},
   password: {type: String, required: true},
@@ -16,7 +16,7 @@ let UserSchema = new Schema({
   }],
 });
 
-// hashes password with bcrypt
+  // hashes password with bcrypt
 UserSchema.pre('save', function(next) {
   let user = this;
   if (this.isModified('password') || this.isNew) {
@@ -49,3 +49,4 @@ UserSchema.methods.comparePassword = function(pw, cb) {
 };
 
 module.exports = mongoose.model('User', UserSchema, 'users');
+

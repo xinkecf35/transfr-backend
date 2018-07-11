@@ -35,7 +35,7 @@ const vcardmanager = require('./routes/vcardmanager.js');
 
 app.use('/api/v1/users', userauth);
 app.use('/api/v1/user',
-  passport.authenticate('jwt', {session: false}, vcardmanager));
+  passport.authenticate('jwt', {session: false}), vcardmanager);
 
 app.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
