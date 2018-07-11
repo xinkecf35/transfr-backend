@@ -66,7 +66,7 @@ passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG, function(jwtPayload, done) {
     if (user) {
       return done(null, user);
     } else {
-      return done(err, false);
+      return done(err);
     }
   });
 }));
@@ -94,6 +94,7 @@ router.post('/', function(req, res, next) {
       }
       // Authentication successful, return a jwt
       const profile = {
+        id: user.id,
         username: user.username,
         email: user.email,
         name: user.name,
