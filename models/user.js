@@ -3,16 +3,14 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
 let UserSchema = new Schema({
-  username: {
-    type: String,
-    required: true},
+  username: {type: String, required: true},
   email: {type: String, required: true},
   name: {type: String, required: true},
   password: {type: String, required: true},
   created: {type: Date, default: Date.now},
-  vcardProfiles: [{
+  vcards: [{
     type: Schema.Types.ObjectId,
-    ref: 'VCardProfile',
+    ref: 'VCardSchema',
   }],
 });
 
