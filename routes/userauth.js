@@ -66,7 +66,7 @@ passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG, function(jwtPayload, done) {
     if (user) {
       return done(null, user);
     } else {
-      return done(err);
+      return done(null, false);
     }
   });
 }));
@@ -93,16 +93,18 @@ router.post('/', function(req, res, next) {
         return next(err);
       }
       // Authentication successful, return a jwt
-      const profile = {
+      let current = new Date();
+      const claims = {
         id: user.id,
         username: user.username,
         email: user.email,
         name: user.name,
+        created: current.toISOString(),
       };
-      const token = jwt.sign(profile, process.env.JWT_SECRET, {
+      const token = jwt.sign(claims, process.env.JWT_SECRET, {
         expiresIn: 86400,
       });
-      return res.status(201).json({profile, token});
+      return res.status(201).json({claims, token});
     });
   })(req, res, next);
 });
