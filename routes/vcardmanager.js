@@ -5,7 +5,7 @@ const router = new express.Router();
 
 // Create a VCard Profile for User
 router.post('/:userId/profiles', function(req, res, next) {
-  let username = (req.params.userId).toString();
+  const username = (req.params.userId).toString();
   User.findOne({username: username}, function(err, user) {
     if (err) {
       next(err);
@@ -26,21 +26,48 @@ router.post('/:userId/profiles', function(req, res, next) {
       fullName: body.fullName,
     });
     VCard.setOptionalAttributes(body, profile);
-    profile.save();
+    profile.save(function(err) {
+      if (err) {
+        next(err);
+      }
+    });
     user.vcards.push(profile._id);
+    user.save();
     res.status(201).send(profile);
   });
 });
 
 // Get all user info.
-router.get(':userId/', function(req, res, next) {
-
+router.get('/:userId', function(req, res, next) {
+  const username = (req.params.userId).toString();
+  User.findOne({username: username}).populate('vcards').exec(
+    function(err, vcards) {
+      if (err) {
+        next(err);
+      }
+      if (!vcards) {
+        res.status(500).send('Unable to retrieve data');
+      }
+      res.json(vcards);
+    });
 });
 
-// Get VCard Profiles for User
+router.delete('/:userId/profiles/:profileId', function(req, res, next) {
+  // Santizing query paths
+  const username = (req.params.userId).toString();
+  const profileId = (req.params.profileId).toString();
 
-router.get('/:userId/profiles', function(req, res, next) {
+  // Parameters for findOneAndUpdate
+  const filter = {username: username};
+  const update = {$pull: {vcards: {$in: profileId}}};
+  const options = {new: true}
 
+  User.findOneAndUpdate(filter, update, options, function(err, user) {
+    if (err) {
+      next(err);
+    }
+    res.json(user);
+  });
 });
 
 module.exports = router;

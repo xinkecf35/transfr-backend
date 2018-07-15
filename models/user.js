@@ -10,7 +10,7 @@ let UserSchema = new Schema({
   created: {type: Date, default: Date.now},
   vcards: [{
     type: Schema.Types.ObjectId,
-    ref: 'VCardSchema',
+    ref: 'VCard',
   }],
 });
 
