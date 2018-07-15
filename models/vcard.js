@@ -25,7 +25,9 @@ let VCardSchema = new Schema({
 });
 // Verify that required attributes are in body
 VCardSchema.statics.verifyBody = function verifyBody(body) {
-  if (!(('name' in body) && ('fullName' in body))) return false;
+  if (!(('name' in body) && ('fullName' in body) && ('description' in body))) {
+    return false;
+  }
   return true;
 };
 
