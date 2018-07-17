@@ -62,7 +62,6 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
 passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG,
   function(req, jwtPayload, done) {
     User.findOne({username: jwtPayload.sub}, function(err, user) {
-      req.res.locals.userId = jwtPayload.sub;
       if (err) {
         return done(err, false);
       }
