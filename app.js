@@ -29,6 +29,8 @@ app.use(flash());
 
 // Misc app and Router configuration
 
+// Hacky way to check user id of path parameters
+
 const port = process.env.PORT || 8800;
 const userauth = require('./routes/userauth.js');
 const vcardmanager = require('./routes/vcardmanager.js');
