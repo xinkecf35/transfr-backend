@@ -3,19 +3,9 @@ const User = require('../models/user.js');
 const VCard = require('../models/vcard.js');
 const router = new express.Router();
 
-// Checking to make sure clients cannot spoof their way into other
-// user's data
-router.param('userId', function(req, res, next, userId) {
-  if (userId !== res.locals.userId) {
-    res.status(401).send('Unauthorized');
-  } else {
-    next();
-  }
-});
-
 // Create a VCard Profile for User
-router.post('/:userId/profiles', function(req, res, next) {
-  const username = (req.params.userId).toString();
+router.post('/profiles', function(req, res, next) {
+  const username = req.user.username;
   User.findOne({username: username}, function(err, user) {
     if (err) {
       next(err);
@@ -48,8 +38,8 @@ router.post('/:userId/profiles', function(req, res, next) {
 });
 
 // Get all user info.
-router.get('/:userId', function(req, res, next) {
-  const username = (req.params.userId).toString();
+router.get('/', function(req, res, next) {
+  const username = req.user.username;
   User.findOne({username: username}).populate('vcards').exec(
     function(err, vcards) {
       if (err) {
@@ -62,9 +52,9 @@ router.get('/:userId', function(req, res, next) {
     });
 });
 
-router.delete('/:userId/profiles/:profileId', function(req, res, next) {
+router.delete('/profiles/:profileId', function(req, res, next) {
   // Santizing query paths
-  const username = (req.params.userId).toString();
+  const username = req.user.username;
   const profileId = (req.params.profileId).toString();
 
   // Parameters for findOneAndUpdate

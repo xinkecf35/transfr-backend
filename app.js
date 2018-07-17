@@ -36,7 +36,7 @@ const userauth = require('./routes/userauth.js');
 const vcardmanager = require('./routes/vcardmanager.js');
 
 app.use('/api/v1/users', userauth);
-app.use('/api/v1/user',
+app.use('/api/v1/userdata',
   passport.authenticate('jwt', {session: false}), vcardmanager);
 
 app.get('/', function(req, res) {
