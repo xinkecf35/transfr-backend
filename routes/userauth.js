@@ -22,6 +22,7 @@ const JWTStrategy = PassportJWT.Strategy;
 const JWT_STRATEGY_CONFIG = {
   jwtFromRequest: PassportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
+  passReqToCallback: true,
 };
 
 // Serializing user
@@ -58,23 +59,25 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
   }));
 
 // JWT Strategy
-passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG, function(jwtPayload, done) {
-  User.findById(jwtPayload.id, function(err, user) {
-    if (err) {
-      return done(err, false);
-    }
-    if (user) {
-      return done(null, user);
-    } else {
-      return done(null, false);
-    }
-  });
-}));
+passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG,
+  function(req, jwtPayload, done) {
+    User.findOne({username: jwtPayload.sub}, function(err, user) {
+      req.res.locals.userId = jwtPayload.sub;
+      if (err) {
+        return done(err, false);
+      }
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      }
+    });
+  }));
 
 
 /*
-    * Authentication and authorization of users
-    */
+ * Authentication and authorization of users
+ */
 
 // Password authentication
 router.post('/', function(req, res, next) {
@@ -95,10 +98,9 @@ router.post('/', function(req, res, next) {
       // Authentication successful, return a jwt
       let current = new Date();
       const claims = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
+        sub: user.username,
         name: user.name,
+        iss: 'https://transfr.info',
         created: current.toISOString(),
       };
       const token = jwt.sign(claims, process.env.JWT_SECRET, {
