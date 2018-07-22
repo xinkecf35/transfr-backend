@@ -25,15 +25,21 @@ router.post('/profiles', function(req, res, next) {
       name: body.name,
       fullName: body.fullName,
     });
-    VCard.setOptionalAttributes(body, profile);
+    profile.setOptionalAttributes(body);
     profile.save(function(err) {
       if (err) {
         next(err);
+      } else {
+        user.vcards.push(profile._id);
+        user.save(function(err) {
+          if (err) {
+            next(err);
+          } else {
+            res.status(201).send(profile);
+          }
+        });
       }
     });
-    user.vcards.push(profile._id);
-    user.save();
-    res.status(201).send(profile);
   });
 });
 
@@ -53,20 +59,26 @@ router.get('/', function(req, res, next) {
 });
 
 router.delete('/profiles/:profileId', function(req, res, next) {
-  // Santizing query paths
-  const username = req.user.username;
-  const profileId = (req.params.profileId).toString();
-
-  // Parameters for findOneAndUpdate
-  const filter = {username: username};
-  const update = {$pull: {vcards: {$in: profileId}}};
-  const options = {new: true};
-
-  User.findOneAndUpdate(filter, update, options, function(err, user) {
-    if (err) {
-      next(err);
+  const cardQuery = VCard.findOneAndDelete({profileId: req.params.profileId});
+  const deletePromise = cardQuery.exec();
+  deletePromise.then(function(card) {
+    if (card) {
+      const filter = {username: req.user.username};
+      const update = {$pull: {vcards: {$in: card._id}}};
+      const options = {new: true};
+      return User.findOneAndUpdate(filter, update, options);
+    } else {
+      res.json({success: false, error: 'no such record'});
     }
-    res.json(user);
+  }).then(function(user) {
+    if (user) {
+      const meta = {success: true};
+      const body = {user, meta};
+      res.json(body);
+    }
+  }).catch(function(err) {
+    console.log(err);
+    next(err);
   });
 });
 
