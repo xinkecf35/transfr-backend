@@ -111,11 +111,11 @@ router.post('/', function(req, res, next) {
 });
 
 /*
-      * User data management
-      */
+ * User data management
+ */
 
 // Update user
-router.put('/', function(req, res, next) {
+router.patch('/', function(req, res, next) {
   passport.authenticate('jwt', function(err, user, info) {
   });
 });

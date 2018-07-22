@@ -18,6 +18,9 @@ const flash = require('connect-flash');
 // configure database and handling intial connection promise
 mongoose.connect(dbURI, {useNewUrlParser: true});
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', function() {
+  console.log('Mongo database is connected');
+});
 
 // configure app to use body-parser
 app.use(bodyParser.urlencoded({extended: true}));
@@ -28,8 +31,6 @@ app.use(passport.initialize());
 app.use(flash());
 
 // Misc app and Router configuration
-
-// Hacky way to check user id of path parameters
 
 const port = process.env.PORT || 8800;
 const userauth = require('./routes/userauth.js');
