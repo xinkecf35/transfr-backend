@@ -1,61 +1,61 @@
 const express = require('express');
-const User = require('../models/user.js');
-const VCard = require('../models/vcard.js');
+const User = require('../models/user');
+const VCard = require('../models/vcard');
 const router = new express.Router();
 
 // Create a VCard Profile for User
 router.post('/profiles', function(req, res, next) {
-  const username = req.user.username;
-  User.findOne({username: username}, function(err, user) {
-    if (err) {
-      next(err);
-    }
-    if (!user) {
-      // Uh, this should not be triggered considering
-      // authentication should have failed first,
-      // missing some assumption maybe?
-      return res.status(500).send('How the hell did you get here!?');
-    }
-    const body = req.body;
-    if (!VCard.verifyBody(body)) {
-      res.status(400).send('Missing required parameters; check body');
-    }
-    let profile = new VCard({
-      description: body.description,
-      name: body.name,
-      fullName: body.fullName,
-    });
-    profile.setOptionalAttributes(body);
-    profile.save(function(err) {
-      if (err) {
-        next(err);
-      } else {
-        user.vcards.push(profile._id);
-        user.save(function(err) {
-          if (err) {
-            next(err);
-          } else {
-            res.status(201).send(profile);
-          }
-        });
-      }
-    });
+  const user = req.user;
+  // Verify parameters are correct
+  if (!VCard.verifyBody(req.body)) {
+    const meta = {
+      success: false,
+      error: 'Missing required parameters, check body'};
+    res.status(400).json({meta: meta});
+  }
+  // Create VCard and populate values
+  const body = req.body;
+  let profile = new VCard({
+    description: body.description,
+    name: body.name,
+    fullName: body.fullName,
   });
+  profile.setOptionalAttributes(req.body);
+  profile.save().then(function(card) {
+    user.vcards.push(card._id);
+    return user.save();
+  }).then(function() {
+    return VCard.findById(profile._id, '-_id').exec();
+  }).then(function(card) {
+    const meta = {success: true};
+    res.status(201).json({user: card, meta});
+  }).catch(next);
 });
 
 // Get all user info.
 router.get('/', function(req, res, next) {
   const username = req.user.username;
-  User.findOne({username: username}).populate('vcards').exec(
-    function(err, vcards) {
-      if (err) {
-        next(err);
-      }
-      if (!vcards) {
-        res.status(500).send('Unable to retrieve data');
-      }
-      res.json(vcards);
-    });
+  let userQuery = User.
+    findOne({username: username}).
+    populate('vcards', '-_id').
+    select('-_id').
+    exec();
+  const success = function(user) {
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(400).json({success: false, error: 'no such user exists'});
+    }
+  };
+  const failure = function(err) {
+    console.log(err);
+    next(err);
+  };
+  userQuery.then(success, failure);
+});
+
+router.patch('profiles/:profileId', function(req, res, next) {
+
 });
 
 router.delete('/profiles/:profileId', function(req, res, next) {
@@ -66,19 +66,23 @@ router.delete('/profiles/:profileId', function(req, res, next) {
       const filter = {username: req.user.username};
       const update = {$pull: {vcards: {$in: card._id}}};
       const options = {new: true};
-      return User.findOneAndUpdate(filter, update, options);
+      return User.
+        findOneAndUpdate(filter, update, options).
+        populate('vcards', '-_id');
     } else {
-      res.json({success: false, error: 'no such record'});
+      throw new Error('no such record');
     }
   }).then(function(user) {
     if (user) {
       const meta = {success: true};
-      const body = {user, meta};
-      res.json(body);
+      res.json({user, meta});
+    } else {
+      throw new Error('no such user');
     }
   }).catch(function(err) {
     console.log(err);
-    next(err);
+    const meta = {success: false, error: err.message};
+    res.status(400).json({meta: meta});
   });
 });
 

@@ -37,14 +37,14 @@ passport.deserializeUser(function(user, cb) {
 // Local Strategy
 passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
   function(username, password, done) {
-    User.findOne({username: username}, function(err, user) {
+    const verify = function(err, user) {
       if (err) {
         return done(err);
       }
       if (!user) {
-        return done(null,
-          false,
-          {message: 'Incorrect username or username not found'});
+        return done(null, false, {
+          message: 'Incorrect username or username not found',
+        });
       }
       user.comparePassword(password, function(err, response) {
         if (err) {
@@ -53,9 +53,12 @@ passport.use(new LocalStrategy(LOCAL_STRATEGY_CONFIG,
         if (response) {
           return done(null, user);
         }
-        done(null, false, {message: 'Incorrect password or username'});
+        done(null, false, {
+          message: 'Incorrect password or username',
+        });
       });
-    });
+    };
+    User.findOne({username: username}, '+password', verify);
   }));
 
 // JWT Strategy

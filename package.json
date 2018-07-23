@@ -29,6 +29,7 @@
     "express": "^4.16.3",
     "express-oauth-server": "^2.0.0",
     "express-session": "^1.15.6",
+    "fast-json-patch": "^2.0.6",
     "mongoose": "^5.2.2",
     "npm": "^6.1.0",
     "passport": "^0.4.0",
