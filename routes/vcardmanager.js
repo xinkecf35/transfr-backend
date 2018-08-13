@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/user');
 const VCard = require('../models/vcard');
+const jsonpatch = require('fast-json-patch');
 const router = new express.Router();
 
 // Create a VCard Profile for User
@@ -10,7 +11,8 @@ router.post('/profiles', function(req, res, next) {
   if (!VCard.verifyBody(req.body)) {
     const meta = {
       success: false,
-      error: 'Missing required parameters, check body'};
+      error: 'Missing required parameters, check body',
+    };
     res.status(400).json({meta: meta});
   }
   // Create VCard and populate values
@@ -54,10 +56,43 @@ router.get('/', function(req, res, next) {
   userQuery.then(success, failure);
 });
 
-router.patch('profiles/:profileId', function(req, res, next) {
+/*
+ * Route updates a specified profile(vCard) as parameterized in URL
+ * Expects a valid JWT and vCard shortId in URL as PathParam and
+ * JSON body as outlined in RFC 6902
+ * Update operations are applied with Fast-JSON-Patch
+ */
 
+router.patch('/profiles/:profileId', function(req, res, next) {
+  let validateError = jsonpatch.validate(req.body);
+  if (validateError) {
+    const meta = metaJson(validateError);
+    res.status(400).json({meta: meta});
+  } else {
+    const profileId = req.params.profileId;
+    let cardQuery = VCard.findOne({profileId: profileId}).exec();
+    cardQuery.then(function(card) {
+      if (card) {
+        let results = jsonpatch.applyPatch(card, req.body, false);
+        console.log(results);
+        card.save();
+        const meta = {success: true};
+        res.json({meta, card});
+      } else {
+        throw new Error('no such profile');
+      }
+    }).catch(function(err) {
+      console.log(err);
+      const meta = {success: false, error: err.message};
+      res.status(400).json({meta: meta});
+    });
+  }
 });
 
+/*
+ * Route removes a specified profile as parameterized in URL
+ * Expects a valid JWT and vCard shortId in URL as PathParam
+ */
 router.delete('/profiles/:profileId', function(req, res, next) {
   const cardQuery = VCard.findOneAndDelete({profileId: req.params.profileId});
   const deletePromise = cardQuery.exec();
@@ -81,9 +116,19 @@ router.delete('/profiles/:profileId', function(req, res, next) {
     }
   }).catch(function(err) {
     console.log(err);
-    const meta = {success: false, error: err.message};
+    const meta = metaJson(err);
     res.status(400).json({meta: meta});
   });
 });
 
 module.exports = router;
+
+/**
+ * Returns Serializable meta information for a request failure
+ * Effectively wraps a success and error key
+ * @param {*} err error in question
+ * @return {*} Serializable meta information about failure
+ */
+function metaJson(err) {
+  return {success: false, error: err.message};
+}
