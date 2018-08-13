@@ -125,7 +125,6 @@ router.patch('/', function(req, res, next) {
 
 // Creates a new user
 router.post('/new', function(req, res, next) {
-  // Need to validate this at some point
   let user = new User();
   user.username = req.body.username;
   user.email = req.body.email;
@@ -133,9 +132,20 @@ router.post('/new', function(req, res, next) {
   user.name = req.body.name;
   user.save(function(err, user) {
     if (err) {
-      return err;
+      if (err.name === 'MongoError' && err.code === 11000) {
+        // username is not unique
+        const meta = {
+          success: false,
+          error: 'username is not unique',
+        };
+        res.status(403).json(meta);
+      } else {
+        // Be less lazy about this later, be more specific/less revealing
+        // About application logic
+        res.status(500).json(err.message);
+      }
     }
-    res.send(user);
+    res.json(user);
   });
 });
 
