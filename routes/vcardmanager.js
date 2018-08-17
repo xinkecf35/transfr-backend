@@ -36,7 +36,7 @@ router.post('/profiles', function(req, res, next) {
 });
 
 // Get all user info.
-router.get('/', function(req, res, next) {
+router.get('/user', function(req, res, next) {
   const username = req.user.username;
   let userQuery = User.
     findOne({username: username}).
@@ -64,7 +64,7 @@ router.get('/', function(req, res, next) {
  * Update operations are applied with Fast-JSON-Patch
  */
 
-router.patch('/profiles/:profileId', function(req, res, next) {
+router.patch('/profile/:profileId', function(req, res, next) {
   const body = sanitize(req.body);
   let validateError = jsonpatch.validate(body);
   if (validateError) {
@@ -95,7 +95,7 @@ router.patch('/profiles/:profileId', function(req, res, next) {
  * Route removes a specified profile as parameterized in URL
  * Expects a valid JWT and vCard shortId in URL as PathParam
  */
-router.delete('/profiles/:profileId', function(req, res, next) {
+router.delete('/profile/:profileId', function(req, res, next) {
   const profileId = sanitize(req.params.profileId);
   const cardQuery = VCard.findOneAndDelete({profileId: profileId});
   const deletePromise = cardQuery.exec();
