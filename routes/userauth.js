@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
+const sanitize = require('mongo-sanitize');
 const User = require('../models/user.js');
 const PassportLocal = require('passport-local');
 const PassportJWT = require('passport-jwt');
@@ -118,13 +119,17 @@ router.post('/', function(req, res, next) {
  */
 
 // Update user
-router.patch('/', function(req, res, next) {
+router.patch('/user/:username', function(req, res, next) {
   passport.authenticate('jwt', function(err, user, info) {
+    if (err) {
+      next(err);
+    }
   });
 });
 
 // Creates a new user
 router.post('/new', function(req, res, next) {
+  req.body = sanitize(req.body);
   let user = new User();
   user.username = req.body.username;
   user.email = req.body.email;
@@ -142,10 +147,12 @@ router.post('/new', function(req, res, next) {
       } else {
         // Be less lazy about this later, be more specific/less revealing
         // About application logic
-        res.status(500).json(err.message);
+        next(err);
       }
     }
-    res.json(user);
+    if (user) {
+      res.json(user);
+    }
   });
 });
 
