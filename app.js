@@ -44,6 +44,28 @@ app.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
 });
 
+// Error Handlers
+if (process.env.NODE_ENV === 'production') {
+  app.use(function(err, req, res, next) {
+    const meta = {
+      success: false,
+      error: err.message,
+    };
+    res.status(err.status || 500).json({meta: meta});
+  });
+} else {
+  app.use(function(err, req, res, next) {
+    console.log(err);
+    const meta = {
+      success: false,
+      error: err.message,
+      stacktrace: (err.stacktrace || ''),
+    };
+    res.status(err.status || 500).json({meta: meta});
+  });
+}
+
+// Final configuration
 app.listen(port);
 console.log('Listening on ' + port);
 

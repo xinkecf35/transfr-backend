@@ -2,13 +2,15 @@ const express = require('express');
 const User = require('../models/user');
 const VCard = require('../models/vcard');
 const jsonpatch = require('fast-json-patch');
+const sanitize = require('mongo-sanitize');
 const router = new express.Router();
 
 // Create a VCard Profile for User
 router.post('/profiles', function(req, res, next) {
   const user = req.user;
   // Verify parameters are correct
-  if (!VCard.verifyBody(req.body)) {
+  const body = sanitize(req.body);
+  if (!VCard.verifyBody(body)) {
     const meta = {
       success: false,
       error: 'Missing required parameters, check body',
@@ -16,13 +18,12 @@ router.post('/profiles', function(req, res, next) {
     res.status(400).json({meta: meta});
   }
   // Create VCard and populate values
-  const body = req.body;
   let profile = new VCard({
     description: body.description,
     name: body.name,
     fullName: body.fullName,
   });
-  profile.setOptionalAttributes(req.body);
+  profile.setOptionalAttributes(body);
   profile.save().then(function(card) {
     user.vcards.push(card._id);
     return user.save();
@@ -64,16 +65,17 @@ router.get('/', function(req, res, next) {
  */
 
 router.patch('/profiles/:profileId', function(req, res, next) {
-  let validateError = jsonpatch.validate(req.body);
+  const body = sanitize(req.body);
+  let validateError = jsonpatch.validate(body);
   if (validateError) {
     const meta = metaJson(validateError);
     res.status(400).json({meta: meta});
   } else {
-    const profileId = req.params.profileId;
+    const profileId = sanitize(req.params.profileId);
     let cardQuery = VCard.findOne({profileId: profileId}).exec();
     cardQuery.then(function(card) {
       if (card) {
-        let results = jsonpatch.applyPatch(card, req.body, false);
+        let results = jsonpatch.applyPatch(card, body, false);
         console.log(results);
         card.save();
         const meta = {success: true};
@@ -94,7 +96,8 @@ router.patch('/profiles/:profileId', function(req, res, next) {
  * Expects a valid JWT and vCard shortId in URL as PathParam
  */
 router.delete('/profiles/:profileId', function(req, res, next) {
-  const cardQuery = VCard.findOneAndDelete({profileId: req.params.profileId});
+  const profileId = sanitize(req.params.profileId);
+  const cardQuery = VCard.findOneAndDelete({profileId: profileId});
   const deletePromise = cardQuery.exec();
   deletePromise.then(function(card) {
     if (card) {

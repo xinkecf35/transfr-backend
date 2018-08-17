@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 
 let UserSchema = new Schema({
-  username: {type: String, required: true},
+  username: {type: String, required: true, unique: true},
   email: {type: String, required: true},
   name: {type: String, required: true},
   password: {type: String, required: true, select: false},
@@ -14,7 +14,7 @@ let UserSchema = new Schema({
   }],
 });
 
-  // hashes password with bcrypt
+// hashes password with bcrypt
 UserSchema.pre('save', function(next) {
   let user = this;
   if (this.isModified('password') || this.isNew) {
