@@ -47,11 +47,10 @@ router.get('/user', function(req, res, next) {
     if (user) {
       res.json(user);
     } else {
-      res.status(400).json({success: false, error: 'no such user exists'});
+      res.status(404).json({success: false, error: 'no such user exists'});
     }
   };
   const failure = function(err) {
-    console.log(err);
     next(err);
   };
   userQuery.then(success, failure);
@@ -81,13 +80,11 @@ router.patch('/profile/:profileId', function(req, res, next) {
         const meta = {success: true};
         res.json({meta, card});
       } else {
-        throw new Error('no such profile');
+        let error = new Error('no such profile');
+        error.status = 404;
+        throw error;
       }
-    }).catch(function(err) {
-      console.log(err);
-      const meta = {success: false, error: err.message};
-      res.status(400).json({meta: meta});
-    });
+    }).catch(next);
   }
 });
 
@@ -115,13 +112,11 @@ router.delete('/profile/:profileId', function(req, res, next) {
       const meta = {success: true};
       res.json({user, meta});
     } else {
-      throw new Error('no such user');
+      let error = new Error('no such user');
+      error.status = 404;
+      throw error;
     }
-  }).catch(function(err) {
-    console.log(err);
-    const meta = metaJson(err);
-    res.status(400).json({meta: meta});
-  });
+  }).catch(next);
 });
 
 module.exports = router;
