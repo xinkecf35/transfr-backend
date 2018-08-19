@@ -60,7 +60,7 @@ if (process.env.NODE_ENV === 'production') {
     const meta = {
       success: false,
       error: err.message,
-      stacktrace: (err.stacktrace || ''),
+      stacktrace: (err.stacktrace || err.stack || ''),
     };
     res.status(err.status || 500).json({meta: meta});
   });

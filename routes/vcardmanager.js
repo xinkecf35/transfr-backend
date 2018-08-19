@@ -44,11 +44,11 @@ router.get('/user', function(req, res, next) {
     select('-_id').
     exec();
   const success = function(user) {
-    if (user) {
-      res.json(user);
-    } else {
+    if (!user) {
       res.status(404).json({success: false, error: 'no such user exists'});
     }
+    const meta = {success: true};
+    res.json({meta, user});
   };
   const failure = function(err) {
     next(err);
@@ -69,23 +69,29 @@ router.patch('/profile/:profileId', function(req, res, next) {
   if (validateError) {
     const meta = metaJson(validateError);
     res.status(400).json({meta: meta});
-  } else {
-    const profileId = sanitize(req.params.profileId);
-    let cardQuery = VCard.findOne({profileId: profileId}).exec();
-    cardQuery.then(function(card) {
-      if (card) {
-        let results = jsonpatch.applyPatch(card, body, false);
-        console.log(results);
-        card.save();
-        const meta = {success: true};
-        res.json({meta, card});
-      } else {
-        let error = new Error('no such profile');
-        error.status = 404;
-        throw error;
-      }
-    }).catch(next);
   }
+  const profileId = sanitize(req.params.profileId);
+  let cardQuery = VCard.findOne({profileId: profileId}).exec();
+  cardQuery.then(function(card) {
+    if (!card) {
+      let error = new Error('no such profile');
+      error.status = 404;
+      throw error;
+    }
+    body.forEach((operation) => {
+      if (operation.op !== 'remove') {
+        jsonpatch.applyOperation(card, operation, false);
+      } else {
+        // Actually removes value from document
+        const newOp = replaceRemoveOperation(operation);
+        jsonpatch.applyOperation(card, newOp, false);
+      }
+    });
+    return card.save();
+  }).then(function(card) {
+    const meta = {success: true};
+    res.json({meta, card});
+  }).catch(next);
 });
 
 /*
@@ -97,25 +103,23 @@ router.delete('/profile/:profileId', function(req, res, next) {
   const cardQuery = VCard.findOneAndDelete({profileId: profileId});
   const deletePromise = cardQuery.exec();
   deletePromise.then(function(card) {
-    if (card) {
-      const filter = {username: req.user.username};
-      const update = {$pull: {vcards: {$in: card._id}}};
-      const options = {new: true};
-      return User.
-        findOneAndUpdate(filter, update, options).
-        populate('vcards', '-_id');
-    } else {
+    if (!card) {
       throw new Error('no such record');
     }
+    const filter = {username: req.user.username};
+    const update = {$pull: {vcards: {$in: card._id}}};
+    const options = {new: true};
+    return User.
+      findOneAndUpdate(filter, update, options).
+      populate('vcards', '-_id');
   }).then(function(user) {
-    if (user) {
-      const meta = {success: true};
-      res.json({user, meta});
-    } else {
+    if (!user) {
       let error = new Error('no such user');
       error.status = 404;
       throw error;
     }
+    const meta = {success: true};
+    res.json({meta, user});
   }).catch(next);
 });
 
@@ -130,3 +134,20 @@ module.exports = router;
 function metaJson(err) {
   return {success: false, error: err.message};
 }
+
+/**
+ * Returns a replace operation to subsitute remove operation while
+ * while working on Mongoose Documents by creating a replace operation
+ * that set a value that is undefined and thereby actually removing the
+ * value
+ * @param {*} operation The original remove operation
+ * @return {*} New replace operation with undefined value
+ */
+function replaceRemoveOperation(operation) {
+  return {
+    op: 'replace',
+    path: operation.path,
+    value: undefined,
+  };
+}
+
