@@ -37,10 +37,10 @@ const userauth = require('./routes/userauth.js');
 const vcardmanager = require('./routes/vcardmanager.js');
 const vcardpublic = require('./routes/vcardpublic.js');
 
-app.use('/api/v1/users', userauth);
-app.use('/api/v1/userdata',
+app.use('/v1/users', userauth);
+app.use('/v1/userdata',
   passport.authenticate('jwt', {session: false}), vcardmanager);
-app.use('/api/v1/card', vcardpublic);
+app.use('/v1/card', vcardpublic);
 app.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
 });
