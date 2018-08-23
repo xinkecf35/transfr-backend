@@ -114,6 +114,10 @@ router.post('/', function(req, res, next) {
   })(req, res, next);
 });
 
+router.get('/google-auth/callback', function(req, res, next) {
+
+});
+
 /*
  * User data management
  */
