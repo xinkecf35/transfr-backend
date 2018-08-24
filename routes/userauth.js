@@ -109,7 +109,7 @@ router.post('/', function(req, res, next) {
       const token = jwt.sign(claims, process.env.JWT_SECRET, {
         expiresIn: 86400,
       });
-      return res.status(201).json({claims, token});
+      return res.status(200).json({claims, token});
     });
   })(req, res, next);
 });
@@ -155,7 +155,7 @@ router.post('/new', function(req, res, next) {
       }
     }
     if (user) {
-      res.json(user);
+      res.status(201).json(user);
     }
   });
 });
