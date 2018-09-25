@@ -149,13 +149,20 @@ router.post('/new', function(req, res, next) {
         };
         res.status(403).json(meta);
       } else {
-        // Be less lazy about this later, be more specific/less revealing
-        // About application logic
+        // Call error handler
         next(err);
       }
     }
     if (user) {
-      res.status(201).json(user);
+      const meta = {
+        success: true,
+        message: 'account successfully created',
+      };
+      const success = {
+        created: user.created,
+        username: user.username,
+      };
+      res.status(201).json({meta, success});
     }
   });
 });
