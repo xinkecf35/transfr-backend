@@ -56,16 +56,6 @@ if (process.env.NODE_ENV === 'production') {
     };
     res.status(err.status || 500).json({meta: meta});
   });
-} else {
-  app.use(function(err, req, res, next) {
-    console.log(err);
-    const meta = {
-      success: false,
-      error: err.message,
-      stacktrace: (err.stacktrace || err.stack || ''),
-    };
-    res.status(err.status || 500).json({meta: meta});
-  });
 }
 
 // Final configuration
