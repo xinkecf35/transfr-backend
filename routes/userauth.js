@@ -109,6 +109,9 @@ router.post('/', function(req, res, next) {
       const token = jwt.sign(claims, process.env.JWT_SECRET, {
         expiresIn: 86400,
       });
+      // Set JWT cookie
+      let options = {httpOnly: true};
+      res.cookie('jwt', token, options);
       return res.status(200).json({claims, token});
     });
   })(req, res, next);
