@@ -6,6 +6,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const dbURI = process.env.DATABASE_URI;
 const db = mongoose.connection;
@@ -25,6 +26,7 @@ db.once('open', function() {
 // configure app to use body-parser
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // configure passport
 app.use(passport.initialize());
