@@ -20,8 +20,19 @@ const LOCAL_STRATEGY_CONFIG = {
   session: false,
 };
 const JWTStrategy = PassportJWT.Strategy;
+const cookieExtractor = function(req) {
+  if (req && req.cookies) {
+    return req.cookies['jwt'];
+  } else {
+    return null;
+  }
+};
+const extractors = [
+  PassportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
+  cookieExtractor,
+];
 const JWT_STRATEGY_CONFIG = {
-  jwtFromRequest: PassportJWT.ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: PassportJWT.ExtractJwt.fromExtractors(extractors),
   secretOrKey: process.env.JWT_SECRET,
   passReqToCallback: true,
 };
