@@ -16,7 +16,6 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const csurf = require('csurf');
 
-
 // configure database and handling intial connection promise
 mongoose.connect(dbURI, {useNewUrlParser: true});
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -34,7 +33,6 @@ app.use(passport.initialize());
 app.use(flash());
 
 // Misc app and Router configuration
-
 const port = process.env.PORT || 8800;
 const userauth = require('./routes/userauth.js');
 const vcardmanager = require('./routes/vcardmanager.js');
