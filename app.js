@@ -14,6 +14,7 @@ const db = mongoose.connection;
 // Passport setup
 const passport = require('passport');
 const flash = require('connect-flash');
+const csurf = require('csurf');
 
 
 // configure database and handling intial connection promise
