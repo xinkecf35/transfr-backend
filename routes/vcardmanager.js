@@ -65,7 +65,8 @@ router.get('/user', function(req, res, next) {
 
 router.patch('/profile/:profileId', function(req, res, next) {
   const body = sanitize(req.body);
-  let validateError = jsonpatch.validate(body);
+  const patch = body['patch'];
+  let validateError = jsonpatch.validate(patch);
   if (validateError) {
     const meta = metaJson(validateError);
     res.status(400).json({meta: meta});
@@ -78,7 +79,7 @@ router.patch('/profile/:profileId', function(req, res, next) {
       error.status = 404;
       throw error;
     }
-    body.forEach((operation) => {
+    patch.forEach((operation) => {
       if (operation.op !== 'remove') {
         jsonpatch.applyOperation(card, operation, false);
       } else {
