@@ -116,7 +116,7 @@ router.post('/', csurf(options), function(req, res, next) {
       const claims = {
         sub: user.username,
         name: user.name,
-        iss: 'https://transfr.info',
+        iss: 'https://api.transfr.info',
         created: current.toISOString(),
       };
       const token = jwt.sign(claims, process.env.JWT_SECRET, {
@@ -125,9 +125,7 @@ router.post('/', csurf(options), function(req, res, next) {
       // Set JWT cookie
       let options = {httpOnly: true};
       res.cookie('jwt', token, options);
-      // Set CSRF token for double submit
       const csrf = req.csrfToken();
-      res.cookie('_csrf', csrf, options);
       return res.status(200).json({claims, token, csrf});
     });
   })(req, res, next);
@@ -142,7 +140,7 @@ router.get('/google-auth/callback', function(req, res, next) {
  */
 
 // Update user
-router.patch('/user/:username', function(req, res, next) {
+router.patch('/user/', function(req, res, next) {
   passport.authenticate('jwt', function(err, user, info) {
     if (err) {
       next(err);
