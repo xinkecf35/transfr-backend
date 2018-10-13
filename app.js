@@ -34,13 +34,17 @@ app.use(flash());
 
 // Misc app and Router configuration
 const port = process.env.PORT || 8800;
+let csrfOptions = {cookie: true};
 const userauth = require('./routes/userauth.js');
 const vcardmanager = require('./routes/vcardmanager.js');
 const vcardpublic = require('./routes/vcardpublic.js');
 
 app.use('/v1/users', userauth);
-app.use('/v1/userdata',
-  passport.authenticate('jwt', {session: false}), vcardmanager);
+app.use(
+  '/v1/userdata',
+  csurf(csrfOptions),
+  passport.authenticate('jwt', {session: false}),
+  vcardmanager);
 app.use('/v1/card', vcardpublic);
 app.get('/', function(req, res) {
   res.json({message: 'Welcome to transfr.info REST API'});
