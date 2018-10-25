@@ -123,7 +123,7 @@ router.post('/', csurf(options), function(req, res, next) {
         expiresIn: 86400,
       });
       // Set JWT cookie
-      let options = {httpOnly: true};
+      let options = {httpOnly: true, secure: true};
       res.cookie('jwt', token, options);
       const csrf = req.csrfToken();
       return res.status(200).json({claims, token, csrf});
