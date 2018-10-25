@@ -95,7 +95,13 @@ passport.use(new JWTStrategy(JWT_STRATEGY_CONFIG,
 
 // Password authentication
 
-const options = {cookie: true, ignoreMethods: ['POST']};
+const options = {
+  cookie: {
+    httpOnly: true,
+    secure: true,
+    maxAge: 86400, // one day in seconds
+  },
+  ignoreMethods: ['POST']};
 router.post('/', csurf(options), function(req, res, next) {
   passport.authenticate('local', function(err, user, info) {
     if (err) {
@@ -119,11 +125,12 @@ router.post('/', csurf(options), function(req, res, next) {
         iss: 'https://api.transfr.info',
         created: current.toISOString(),
       };
+      const age = 86400;
       const token = jwt.sign(claims, process.env.JWT_SECRET, {
-        expiresIn: 86400,
+        expiresIn: age,
       });
       // Set JWT cookie
-      let options = {httpOnly: true, secure: true};
+      let options = {httpOnly: true, secure: true, maxAge: age*1000};
       res.cookie('jwt', token, options);
       const csrf = req.csrfToken();
       return res.status(200).json({claims, token, csrf});
