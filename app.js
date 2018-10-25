@@ -34,7 +34,11 @@ app.use(flash());
 
 // Misc app and Router configuration
 const port = process.env.PORT || 8800;
-let csrfOptions = {cookie: true};
+let csrfOptions = {cookie: {
+  httpOnly: true,
+  secure: true,
+  maxAge: 86400,
+}};
 const userauth = require('./routes/userauth.js');
 const vcardmanager = require('./routes/vcardmanager.js');
 const vcardpublic = require('./routes/vcardpublic.js');
