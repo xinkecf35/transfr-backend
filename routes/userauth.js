@@ -9,6 +9,11 @@ const csurf = require('csurf');
 
 const router = new express.Router();
 
+let domain = '.transfr.info';
+if (process.env.NODE_ENV === 'debug') {
+  domain = '.transfr.test';
+}
+
 /*
 * Defining Passport Strategies
 */
@@ -99,6 +104,7 @@ const options = {
   cookie: {
     httpOnly: true,
     secure: true,
+    domain: domain,
     maxAge: 86400, // one day in seconds
   },
   ignoreMethods: ['POST']};
@@ -130,7 +136,12 @@ router.post('/', csurf(options), function(req, res, next) {
         expiresIn: age,
       });
       // Set JWT cookie
-      let options = {httpOnly: true, secure: true, maxAge: age*1000};
+      let options = {
+        httpOnly: true,
+        secure: true,
+        domain: domain,
+        maxAge: age*1000,
+      };
       res.cookie('jwt', token, options);
       const csrf = req.csrfToken();
       return res.status(200).json({claims, token, csrf});
