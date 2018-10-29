@@ -33,10 +33,15 @@ app.use(passport.initialize());
 app.use(flash());
 
 // Misc app and Router configuration
+let domain = '.transfr.info';
 const port = process.env.PORT || 8800;
+if (process.env.NODE_ENV === 'debug') {
+  domain = '.transfr.test';
+}
 let csrfOptions = {cookie: {
   httpOnly: true,
   secure: true,
+  domain: domain,
   maxAge: 86400,
 }};
 const userauth = require('./routes/userauth.js');
