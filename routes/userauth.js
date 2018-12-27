@@ -142,11 +142,28 @@ router.post('/', csurf(options), function(req, res, next) {
         domain: domain,
         maxAge: age*1000,
       };
+      // NOTE: for logout, we will set a cryptographic nonce set in the JWT
+      // and store that to sessionStorage; we log out by removing that nonce
+      // For authentication, that nonce must be there and compared
       res.cookie('jwt', token, options);
       const csrf = req.csrfToken();
       return res.status(200).json({claims, token, csrf});
     });
   })(req, res, next);
+});
+
+router.post('/token', function(req, res, next) {
+  if (req.query.logout) {
+    const options = {
+      httpOnly: true,
+      secure: true,
+      domain: domain,
+    };
+    res.clearCookie('jwt', options);
+    res.clearCookie('_csrf', options);
+    const meta = {success: true, message: 'logging out'};
+    res.json({meta});
+  }
 });
 
 router.get('/google-auth/callback', function(req, res, next) {

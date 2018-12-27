@@ -1,30 +1,43 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const shortId = require('shortid'); // I write my own for giggles
+const shortId = require('shortid');
 const ID_LENGTH = 9;
 
 const optionalAttributes = [
   'telephone',
+  'email',
   'organization',
   'address',
   'nickname',
   'note',
   'birthday',
   'impp',
+  'photo',
 ];
 
+let VCardEmail = new Schema({
+  email: {type: String, required: true},
+  type: String,
+});
+
+let VCardPhone = new Schema({
+  telephone: {type: String, required: true},
+  type: String,
+});
 let VCardSchema = new Schema({
   profileId: {type: String, required: true},
   name: {type: String, required: true},
   fullName: {type: String, required: true},
   description: {type: String, required: true},
-  telephone: String,
   organization: String,
   address: String,
   nickname: String,
   note: String,
   birthday: String,
   impp: String,
+  photo: String,
+  telephone: [VCardPhone],
+  email: [VCardEmail],
 });
 
 VCardSchema.pre('validate', function(next) {
