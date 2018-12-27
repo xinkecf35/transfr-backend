@@ -16,12 +16,12 @@ const optionalAttributes = [
 ];
 
 let VCardEmail = new Schema({
-  email: {type: String, required: true},
+  value: {type: String, required: true},
   type: String,
 });
 
 let VCardPhone = new Schema({
-  telephone: {type: String, required: true},
+  value: {type: String, required: true},
   type: String,
 });
 let VCardSchema = new Schema({
