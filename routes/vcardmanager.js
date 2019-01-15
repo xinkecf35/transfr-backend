@@ -89,8 +89,10 @@ router.patch('/profile/:profileId', function(req, res, next) {
       }
     });
     return card.save();
-  }).then(function(card) {
+  }).then(function(result) {
     const meta = {success: true};
+    let card = result.toObject();
+    delete card._id;
     res.json({meta, card});
   }).catch(next);
 });
