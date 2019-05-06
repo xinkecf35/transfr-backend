@@ -1,0 +1,19 @@
+version: '2.1'
+
+services:
+  transfr-backend:
+    image: transfr-backend
+    build: .
+    env_file: 
+      - .env.production
+    ports:
+      - 8800:8800
+    depends_on: 
+      - mongo
+    links:
+      - mongo
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
