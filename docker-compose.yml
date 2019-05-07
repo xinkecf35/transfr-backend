@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   transfr-backend:
-    image: transfr-backend
+    image: transfr-backend:latest
     build: .
     env_file: 
       - .env.production
