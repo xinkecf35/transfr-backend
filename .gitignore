@@ -1,5 +1,7 @@
 # Created by https://www.gitignore.io/api/node
 
+.DS_Store
+
 ### Node ###
 # Logs
 logs
@@ -59,6 +61,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env*
 
 # VS Code files
 .vscode
