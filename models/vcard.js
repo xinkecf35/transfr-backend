@@ -24,13 +24,19 @@ let VCardPhone = new Schema({
   value: {type: String, required: true},
   type: String,
 });
+
+let VCardAddress = new Schema({
+  value: {type: String, required: true},
+  type: String,
+});
+
 let VCardSchema = new Schema({
   profileId: {type: String, required: true},
   name: {type: String, required: true},
   fullName: {type: String, required: true},
   description: {type: String, required: true},
   organization: String,
-  address: String,
+  address: [VCardAddress],
   nickname: String,
   note: String,
   birthday: String,
