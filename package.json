@@ -27,7 +27,6 @@
     "debug": "^3.2.6",
     "dotenv": "^5.0.1",
     "express": "^4.16.4",
-    "express-oauth-server": "^2.0.0",
     "express-session": "^1.15.6",
     "fast-json-patch": "^2.0.7",
     "mongo-sanitize": "^1.0.1",
