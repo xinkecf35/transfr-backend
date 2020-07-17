@@ -17,6 +17,9 @@ const flash = require('connect-flash');
 const csurf = require('csurf');
 
 // configure database and handling intial connection promise
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 mongoose.connect(dbURI, {useNewUrlParser: true});
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', function() {
