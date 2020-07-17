@@ -38,7 +38,7 @@ app.use(flash());
 // Misc app and Router configuration
 let domain = '.transfr.info';
 const port = process.env.PORT || 8800;
-if (process.env.NODE_ENV === 'debug') {
+if (process.env.NODE_ENV === 'development') {
   domain = '.transfr.test';
 }
 let csrfOptions = {cookie: {

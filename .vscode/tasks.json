@@ -10,12 +10,12 @@
                 "-f",
                 "docker-compose.yml",
                 "-f",
-                "docker-compose.debug.yml",
+                "docker-compose.dev.yml",
                 "up",
                 "-d",
                 "--build"
             ],
-            "label": "docker-compose-debug"
+            "label": "docker-compose-dev"
         }
     ]
 }

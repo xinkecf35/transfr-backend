@@ -10,7 +10,7 @@ const csurf = require('csurf');
 const router = new express.Router();
 
 let domain = '.transfr.info';
-if (process.env.NODE_ENV === 'debug') {
+if (process.env.NODE_ENV === 'development') {
   domain = '.transfr.test';
 }
 
