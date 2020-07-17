@@ -1,0 +1,13 @@
+version: '2.1'
+
+services:
+  transfr-backend:
+    image: transfr-backend
+    build: .
+    environment:
+      NODE_ENV: development
+    ports:
+      - 8800:8800
+      - 9229:9229
+    command: node --inspect=0.0.0.0:9229 app.js
+    
