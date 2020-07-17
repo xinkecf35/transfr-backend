@@ -1,17 +1,28 @@
-version: '2.1'
+version: "2.1"
 
 services:
   transfr-backend:
+    container_name: transfr_api
     image: transfr-backend:latest
     build: .
-    env_file: 
+    env_file:
       - .env.production
     ports:
       - 8800:8800
-    depends_on: 
+    depends_on:
       - mongo
-    links:
-      - mongo
+    networks:
+      - transfr-api
   mongo:
-    container_name: mongo
+    container_name: transfr_mongo
     image: mongo
+    networks:
+      - transfr-api
+    volumes:
+      - data-volume:/data/db
+networks:
+  transfr-api:
+    driver: bridge
+
+volumes:
+  data-volume:
